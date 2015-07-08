@@ -2,7 +2,7 @@
 #define BRAINBOARDCONTROLLER_H
 
 #include <QObject>;
-#include "Netzwerk/TCPClientController.h"
+#include "network/tcpclientcontroller.h"
 #include "hal/isfdata.h"
 
 class BrainBoardController : public QObject

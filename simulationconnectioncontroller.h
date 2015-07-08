@@ -2,7 +2,7 @@
 #define SIMULATIONCONNECTIONCONTROLLER_H
 
 #include <QObject>
-#include "Netzwerk/TCPClientController.h"
+#include "network/tcpclientcontroller.h"
 #include "hal/isfdata.h"
 
 class SimulationConnectionController : public QObject

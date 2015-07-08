@@ -124,7 +124,7 @@ void MainWindow::simulationStepDone(void)
     plotSpeed->replot();
 
     QCustomPlot *plotSteering = ui->plotSteeringAngle;
-    if(plotSteering>=100){
+    if(plotDataStep>=100){
         plotSteering->graph(0)->removeData(plotDataStep-100);
         plotSteering->graph(1)->removeData(plotDataStep-100);
     }

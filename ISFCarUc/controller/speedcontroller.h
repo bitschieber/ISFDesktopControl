@@ -8,7 +8,7 @@
 #ifndef SPEEDCONTROLLER_H_
 #define SPEEDCONTROLLER_H_
 
-#include "PIDController.h"
+#include "pidcontroller.h"
 #include "../../hal/i_isfcarhal.h"
 #include <math.h>
 

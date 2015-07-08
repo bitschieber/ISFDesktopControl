@@ -2,10 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "ISFCarUc/isfcaruc.h"
-#include "HAL/i_isfcarhal.h"
-#include "HAL/isfcarhalx86.h"
-#include "Netzwerk/TCPClientController.h"
+#include "isfcaruc/isfcaruc.h"
+#include "hal/i_isfcarhal.h"
+#include "hal/isfcarhalx86.h"
+#include "network/tcpclientcontroller.h"
 #include <QGraphicsScene>
 #include "isfcarthread.h"
 #include <QTimer>

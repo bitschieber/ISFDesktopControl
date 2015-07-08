@@ -1,4 +1,4 @@
-#include "TCPServerController.h"
+#include "tcpservercontroller.h"
 
 TCPServerController::TCPServerController(QObject *parent) : QObject(parent){
 //TCPServerController::TCPServerController(quint16 port){

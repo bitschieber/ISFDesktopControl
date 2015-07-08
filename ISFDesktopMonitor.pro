@@ -19,41 +19,41 @@ SOURCES += main.cpp\
         qcustomplot.cpp \
         mainwindow.cpp \
     startwindow.cpp \
-    Netzwerk/TCPClientController.cpp \
-    Netzwerk/TCPServerController.cpp \
+    network/tcpclientcontroller.cpp \
+    network/tcpservercontroller.cpp \
     hal/isfcarhalx86.cpp \
     hal/i_isfcarhal.cpp \
-    ISFCarUc/isfcaruc.cpp \
+    isfcaruc/isfcaruc.cpp \
     isfcarthread.cpp \
     hal/hardware/motor/imotor.cpp \
     hal/hardware/motor/motorxtec1.cpp \
     hal/hardware/steering/isteering.cpp \
     hal/hardware/steering/steeringtrf417.cpp \
-    ISFCarUc/controller/speedcontroller.cpp \
-    ISFCarUc/controller/PIDController.cpp \
+    isfcaruc/controller/speedcontroller.cpp \
+    isfcaruc/controller/pidcontroller.cpp \
     simulationconnectioncontroller.cpp \
     brainboardcontroller.cpp \
-    ISFCarUc/controller/steeringcontroller.cpp
+    isfcaruc/controller/steeringcontroller.cpp
 
 HEADERS  += mainwindow.h \
         qcustomplot.h \
     startwindow.h \
-    Netzwerk/TCPClientController.h \
-    Netzwerk/TCPServerController.h \
     hal/i_isfcarhal.h \
     hal/isfcarhalx86.h \
-    ISFCarUc/isfcaruc.h \
+    isfcaruc/isfcaruc.h \
     hal/isfdata.h \
     isfcarthread.h \
     hal/hardware/motor/imotor.h \
     hal/hardware/motor/motorxtec1.h \
     hal/hardware/steering/isteering.h \
     hal/hardware/steering/steeringtrf417.h \
-    ISFCarUc/controller/speedcontroller.h \
-    ISFCarUc/controller/PIDController.h \
+    isfcaruc/controller/speedcontroller.h \
     simulationconnectioncontroller.h \
     brainboardcontroller.h \
-    ISFCarUc/controller/steeringcontroller.h
+    isfcaruc/controller/steeringcontroller.h \
+    isfcaruc/controller/pidcontroller.h \
+    network/tcpclientcontroller.h \
+    network/tcpservercontroller.h
 
 FORMS    += mainwindow.ui \
     startwindow.ui
