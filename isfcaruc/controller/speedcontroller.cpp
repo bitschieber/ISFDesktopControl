@@ -5,7 +5,7 @@
  *      Author: Alexander
  */
 
-#include "SpeedController.h"
+#include "speedcontroller.h"
 
 PIController controller(0.9, 0.7);
 //HallSensor hall = 0;

@@ -5,7 +5,7 @@
  *      Author: Alexander
  */
 
-#include "PIDController.h"
+#include "pidcontroller.h"
 /*
 PIDController::PIDController(float k_p, float k_i) {
 	// TODO Auto-generated constructor stub K_i = k_i;
@@ -44,7 +44,7 @@ void PIController::reset(void){
 	esum = 0;
 }
 
-/* Aus dem Arduino Projekt => ACHTUNG, läuft nicht
+/* Aus dem Arduino Projekt => ACHTUNG, laeuft nicht
 // PID Controller constructor
 PIDController::PIDController(float k_p, float k_i, float k_d) : PIController(k_p, k_i) {
   K_d = k_d;
