@@ -50,3 +50,8 @@ GPIO_STATE I_ISFCarHAL::getGPIOState(GPIO_PIN pin)
     return GPIO_RESET;
 }
 
+uint16_t I_ISFCarHAL::writeDataToBrainBoard(uint8_t* data, uint16_t len)
+{
+    return 0;
+}
+

@@ -1,16 +1,27 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+uint32_t plotDataStep = 0;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    _simuConController = new SimulationConnectionController();
+    connect(_simuConController, SIGNAL(imageReceived()), this, SLOT(SimulationImageReceived()));
+
+    _brainBoardController = new BrainBoardController();
+    connect(_brainBoardController, SIGNAL(dataReceived()), this, SLOT(BrainBoardDataReceived()));
+
+
     _connectedToSimulation = false;
     _connectedToBrainBoard = false;
 
     _isfCarHAL = new ISFCarHALx86();
+    //connect(tempHal, SIGNAL(dataToBrainBoard(QByteArray data)), this, SLOT(halDataToBrainBoardHost(QByteArray data)));
+    connect(_isfCarHAL, &ISFCarHALx86::dataToBrainBoard, this, &MainWindow::halDataToBrainBoardHost);
+    //_isfCarHAL = tempHal;
     //_isfCarThread = new ISFCarThread(_isfCarHAL);
     //_isfCarThread->run();
 
@@ -27,6 +38,19 @@ MainWindow::MainWindow(QWidget *parent) :
     _timerWaitForISFRun.setInterval(2);
     connect(&_timerWaitForISFRun,&QTimer::timeout,this,&MainWindow::TimerWaitForISFRunFinished);
 
+
+    //Plots
+    ui->plotPWM->addGraph();
+    ui->plotPWM->addGraph();
+    ui->plotPWM->yAxis->setRange(900,2100);
+
+
+    ui->plotSpeed->addGraph();
+    ui->plotSpeed->addGraph();
+    ui->plotSpeed->yAxis->setRange(-4200,4200);
+    //ui->plotPWM->yAxis->setRange(1000,2000);
+    //ui->plotPWM->xAxis->setRange(0,10);
+    //ui->plotPWM->
     updateGUIData();
 }
 
@@ -40,6 +64,61 @@ MainWindow::~MainWindow()
 void MainWindow::updateGUIData(void)
 {
     updateGUIDataLEDs();
+
+    ui->labelSpeedHardware->setText(QString::number(this->_isfCarHAL->getCurrentSpeed()));
+    ui->labelSteeringAngleHardware->setText(QString::number(this->_isfCarHAL->getCurrentSteeringAngle()));
+    ui->labelSpeedHardwarePWM->setText((QString::number(this->_isfCarHAL->getMotorPWM())));
+    ui->labelSteeringAngleHardwarePWM->setText((QString::number(this->_isfCarHAL->getSteeringAnglePWM())));
+}
+
+void MainWindow::simulationStepDone(void)
+{
+    QCustomPlot *plotPWM = ui->plotPWM;
+    if(plotDataStep>=100){
+        plotPWM->graph(0)->removeData(plotDataStep-100);
+        plotPWM->graph(1)->removeData(plotDataStep-100);
+    }
+    plotPWM->graph(0)->addData(plotDataStep,this->_isfCarHAL->getMotorPWM());
+    plotPWM->graph(1)->addData(plotDataStep,this->_isfCarHAL->getSteeringAnglePWM());
+    //plotPWM->rescaleAxes();
+    plotPWM->xAxis->rescale();
+    //plotPWM->update();
+    plotPWM->replot();
+
+    QCustomPlot *plotSpeed = ui->plotSpeed;
+    if(plotDataStep>=100){
+        plotSpeed->graph(0)->removeData(plotDataStep-100);
+        //plotSpeed->graph(0)->rescaleKeyAxis();
+        plotSpeed->graph(1)->removeData(plotDataStep-100);
+        //plotSpeed->graph(1)->rescaleKeyAxis();
+    }
+    plotSpeed->graph(0)->addData(plotDataStep,this->_isfCarHAL->getCurrentSpeed());
+    plotSpeed->graph(1)->addData(plotDataStep,this->_isfCarHAL->getDesiredSpeed());
+    //plotSpeed->graph(0)->rescaleAxes();
+    //plotSpeed->graph(1)->rescaleAxes();
+    //plotSpeed->update();
+    plotSpeed->xAxis->rescale();
+    plotSpeed->replot();
+
+    plotDataStep++;
+
+    _dataToBrainBoardHost.speed_mms = this->_isfCarHAL->getCurrentSpeed();
+    _dataToBrainBoardHost.speed_pwm = this->_isfCarHAL->getMotorPWM();
+    _dataToBrainBoardHost.steering_angle_pwm = this->_isfCarHAL->getSteeringAnglePWM();
+    _dataToBrainBoardHost.steering_angle = this->_isfCarHAL->getCurrentSteeringAngle();
+
+
+    /*
+    if(_connectedToSimulation == true && _connectedToBrainBoard == true)
+    {
+        QByteArray sendData;
+        sendData.resize(sizeof(DATA_SET_UC_BRAIN_BOARD_t));
+        memcpy(sendData.data(),&_dataToBrainBoardHost,sizeof(DATA_SET_UC_BRAIN_BOARD_t));
+        _brainBoardController->sendDataToHost(sendData);
+    }
+    */
+
+    updateGUIData();
 }
 
 /*updateGUIDataLEDs
@@ -105,23 +184,32 @@ void MainWindow::updateGUIDataLEDs(void)
     }
 }
 
-
+void MainWindow::halDataToBrainBoardHost(QByteArray data)
+{
+    if(_connectedToSimulation == true && _connectedToBrainBoard == true)
+    {
+        _brainBoardController->sendDataToHost(data);
+    }
+}
 
 void MainWindow::on_pushButtonSimulationConnection_clicked()
 {
-    _tcpSimulation = new TCPClientController(this,ui->lineEditSimulationIP->text(),ui->lineEditSimulationPort->text().toUInt());
-    connect(_tcpSimulation, SIGNAL(valueChanged(QByteArray)), this, SLOT(SimulationDataReceived(QByteArray)));
+    //_tcpSimulation = new TCPClientController(this,ui->lineEditSimulationIP->text(),ui->lineEditSimulationPort->text().toUInt());
+    //connect(_tcpSimulation, SIGNAL(valueChanged(QByteArray)), this, SLOT(SimulationDataReceived(QByteArray)));
 
-    _connectedToSimulation = true;
+    if(_simuConController->connectToSimulation(ui->lineEditSimulationIP->text(),ui->lineEditSimulationPort->text().toUInt()))
+    {
+        _connectedToSimulation = true;
 
-    _dataToSimulation.command = SIMUCOM_SEND_IMAGE;
+        _dataToSimulation.command = SIMUCOM_SEND_IMAGE;
 
 
-    QByteArray sendData;
+        QByteArray sendData;
 
-    sendData.resize(sizeof(DATA_SET_TO_SIMULATION_t));
-    memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
-    _tcpSimulation->sendData(sendData);
+        sendData.resize(sizeof(DATA_SET_TO_SIMULATION_t));
+        memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
+        _simuConController->sendData(sendData);
+    }
 
     //connect(ui->btnConnectSimulationCamera, SIGNAL(clicked()),this, SLOT(SimulationCameraClickedSlot()));
 }
@@ -129,11 +217,32 @@ void MainWindow::on_pushButtonSimulationConnection_clicked()
 
 void MainWindow::on_pushButtonBrainBoardConnection_clicked()
 {
-    _tcpBrainBoard = new TCPClientController(this,ui->lineEditBrainBoardIP->text(),ui->lineEditBrainBoardPort->text().toUInt());
-    connect(_tcpBrainBoard, SIGNAL(valueChanged(QByteArray)), this, SLOT(BrainBoardDataReceived(QByteArray)));
 
-    _connectedToBrainBoard = true;
+    if(_brainBoardController->connectToCameraDest(ui->lineEditBrainBoardIP->text(),ui->lineEditBrainBoardPort->text().toUInt()))
+    {
+        if(_brainBoardController->connectToDataHost(ui->lineEditBrainBoardIP->text(),4747))
+        {
+            _connectedToBrainBoard = true;
+        }
+    }
+    //_tcpBrainBoardImage = new TCPClientController(this,ui->lineEditBrainBoardIP->text(),ui->lineEditBrainBoardPort->text().toUInt());
+    //connect(_tcpBrainBoardImage, SIGNAL(dataReceived(void)), this, SLOT(BrainBoardDataReceived(void)));
 
+    //_tcpBrainBoardImage = new TCPClientController(this,ui->lineEditBrainBoardIP->text(),ui->lineEditBrainBoardPort->text().toUInt());
+    //connect(_tcpBrainBoardImage, SIGNAL(valueChanged(QByteArray)), this, SLOT(BrainBoardDataReceived(QByteArray)));
+
+
+
+}
+
+
+void MainWindow::SimulationImageReceived(void)
+{
+    _currentSimulationState = SIMUSTATE_IDLE;
+    _simulationViewScene.addPixmap(QPixmap().fromImage(_simuConController->_simulationViewImage));
+    ui->graphicsViewSimulationView->show();
+
+    simulationStepDone();
 }
 
 /*Simulation Steps
@@ -151,20 +260,24 @@ void MainWindow::getImageFromSimulation(void)
 
     sendData.resize(sizeof(DATA_SET_TO_SIMULATION_t));
     memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
-    _tcpSimulation->sendData(sendData);
+    _simuConController->sendData(sendData);
 }
 void MainWindow::SimulationDataReceived(QByteArray data)
 {
+    /*
     if(data.length()>1000){
-        _simulationViewImageRAW = data;
-        _simulationViewImage = QImage::fromData(_simulationViewImageRAW,"JPEG");//the second param is format name
+        _simuConController->_simulationViewImageRAW = data;
+        _simuConController->_simulationViewImage = QImage::fromData(_simulationViewImageRAW,"JPEG");//the second param is format name
         _currentSimulationState = SIMUSTATE_IDLE;
         _simulationViewScene.addPixmap(QPixmap().fromImage(_simulationViewImage));
         ui->graphicsViewSimulationView->show();
+
+        simulationStepDone();
     }
     else{
             getImageFromSimulation();
     }
+    */
 }
 
 
@@ -193,22 +306,21 @@ void MainWindow::on_pushButtonSimulationStepForward_clicked()
 void MainWindow::sendImageToBrainBoard(void)
 {
     _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
-    _tcpBrainBoard->sendData(_simulationViewImageRAW);
+    _brainBoardController->sendData(_simuConController->_simulationViewImageRAW);
 }
 
 /*
  * Receive Data(Speed, SteeringAngle) from BrainBoard
  */
-void MainWindow::BrainBoardDataReceived(QByteArray data)
+void MainWindow::BrainBoardDataReceived()
+//void MainWindow::BrainBoardDataReceived(QByteArray data)
 {
-    memcpy(&_dataFromBrainBoard,data,sizeof(DATA_SET_BRAIN_BOARD_UC_t));
-    //_simulationViewImage = QImage::fromData(data,"JPEG");//the second param is format name
     if(_currentSimulationState == SIMUSTATE_BRAINBOARD_SENDIMAGE)
     {
         _currentSimulationState = SIMUSTATE_BRAINBOARD_RECEIVED;
 
-        ui->labelSpeedFromBrainBoard->setText(QString::number(_dataFromBrainBoard.speed_mms));
-        ui->labelSteeringAngleFromBrainBoard->setText(QString::number(_dataFromBrainBoard.steering_angle));
+        ui->labelSpeedFromBrainBoard->setText(QString::number(_brainBoardController->_dataFromBrainBoard.speed_mms));
+        ui->labelSteeringAngleFromBrainBoard->setText(QString::number(_brainBoardController->_dataFromBrainBoard.steering_angle));
 
         manipulateX68HAL();
 
@@ -226,8 +338,8 @@ void MainWindow::BrainBoardDataReceived(QByteArray data)
  */
 void MainWindow::manipulateX68HAL(void)
 {
-    _isfCarHAL->setDesiredSpeed(_dataFromBrainBoard.speed_mms);
-    _isfCarHAL->setDesiredSteeringAngle(_dataFromBrainBoard.steering_angle);
+    _isfCarHAL->setDesiredSpeed(_brainBoardController->_dataFromBrainBoard.speed_mms);
+    _isfCarHAL->setDesiredSteeringAngle(_brainBoardController->_dataFromBrainBoard.steering_angle);
     _isfCarHAL->addUsTime(ui->labelSimulationTimeStep->text().toUInt());
 }
 
@@ -243,11 +355,13 @@ void MainWindow::TimerWaitForISFRunFinished(){
         _dataToSimulation.speed_mms = _isfCarHAL->getCurrentSpeed();
         _dataToSimulation.steering_angle = _isfCarHAL->getCurrentSteeringAngle();
         _dataToSimulation.timediff = ui->labelSimulationTimeStep->text().toUInt();
+        _dataToSimulation.gpio_state = _isfCarHAL->getGPIOs();
+
         QByteArray sendData;
 
         sendData.resize(sizeof(DATA_SET_TO_SIMULATION_t));
         memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
-        _tcpSimulation->sendData(sendData);
+        _simuConController->sendData(sendData);
 
         _currentSimulationState = SIMUSTATE_SIMULATION_UPDATE_DATA;
     }

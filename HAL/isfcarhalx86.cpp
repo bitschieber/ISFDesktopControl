@@ -3,51 +3,54 @@
 ISFCarHALx86::ISFCarHALx86()
 {
     //GPIO initalisieren
+    /*
     this->writeGPIO(GPIO_RESET,GPIO_PIN01);
     this->writeGPIO(GPIO_RESET,GPIO_PIN02);
     this->writeGPIO(GPIO_SET,GPIO_PIN03);
     this->writeGPIO(GPIO_RESET,GPIO_PIN04);
+    */
 
-    _desiredSpeed = 0;
-    _desiredSteeringAngle = 0;
-    _currentSpeed = 0;
-    _currentSteeringAngle = 0;
-    _currentUsTime = 0;
+    //Initialize Hardware
+    _motor = new MotorXTEC1();
+    _steering = new SteeringTRF417();
+
+    this->_desiredSpeed = 0;
+    this->_desiredSteeringAngle = 0;
+    this->_currentSpeed = 0;
+    this->_currentMotorPWM = 0;
+    this->_currentSteeringAngle = 0;
+    this->_currentSteeringAnglePWM = 0;
+    this->_currentUsTime = 0;
+    this->_gpioStates = 0;
 }
 
 void ISFCarHALx86::writeMotorPWM(uint16_t pwm){
-
-    int minPWM = 1100;
-    int maxPWM = 1900;
-    float minAngle = -4000;
-    float maxAngle = 4000;
-
-    int pwm2 = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm2/ abs(minAngle));
-
-    this->_currentSpeed = (pwm - 1500) / anglePWM;
+    this->_currentMotorPWM = pwm;
+    this->_currentSpeed =  _motor->calcSpeedFromPWM(this->_currentMotorPWM);
 }
 
 void ISFCarHALx86::writeSteeringPWM(uint16_t pwm){
-    int minPWM = 1100;
-    int maxPWM = 1900;
-    float minAngle = -20;
-    float maxAngle = 20;
-
-    int pwm2 = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm2/ abs(minAngle));
-
-    this->_currentSteeringAngle = (pwm - 1500) / anglePWM;
+    this->_currentSteeringAnglePWM = pwm;
+    this->_currentSteeringAngle = _steering->calcSteeringAngleFromPWM(this->_currentSteeringAnglePWM);
 }
 
 void ISFCarHALx86::writeGPIO(GPIO_STATE state, GPIO_PIN pin)
 {
-
+    if(state == GPIO_SET){
+        _gpioStates |= (1 << pin);
+    }
+    else
+    {
+        _gpioStates &= ~(1 << pin);
+    }
 }
 
 GPIO_STATE ISFCarHALx86::getGPIOState(GPIO_PIN pin)
 {
-    return GPIO_RESET;
+    if(((_gpioStates >> pin) & 1)==1)
+        return GPIO_SET;
+    else
+        return GPIO_RESET;
 }
 
 int16_t ISFCarHALx86::getCurrentSpeed(void){
@@ -55,7 +58,7 @@ int16_t ISFCarHALx86::getCurrentSpeed(void){
 }
 
 int16_t ISFCarHALx86::getAverageSpeed(void){
-    return  _currentSteeringAngle;
+    return  _currentSpeed;
 }
 
 int16_t ISFCarHALx86::getCurrentSteeringAngle(void)
@@ -89,4 +92,29 @@ void ISFCarHALx86::setDesiredSpeed(int16_t speed)
 void ISFCarHALx86::setDesiredSteeringAngle(int16_t angle)
 {
    _desiredSteeringAngle = angle;
+}
+
+uint16_t ISFCarHALx86::getMotorPWM()
+{
+    return this->_currentMotorPWM;
+}
+
+uint16_t ISFCarHALx86::getSteeringAnglePWM()
+{
+    return this->_currentSteeringAnglePWM;
+}
+
+uint16_t ISFCarHALx86::getGPIOs()
+{
+    return this->_gpioStates;
+}
+
+uint16_t ISFCarHALx86::writeDataToBrainBoard(uint8_t* data, uint16_t len)
+{
+    QByteArray d;
+    d.resize(len);
+    memcpy(d.data(),data,len);
+    emit dataToBrainBoard(d);
+
+    return 0;
 }

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "isfdata.h"
 
-enum GPIO_PIN{GPIO_PIN01 = 1,GPIO_PIN02 = 2,GPIO_PIN03 = 4,GPIO_PIN04 = 8,GPIO_PIN05 = 16,GPIO_PIN06 = 32,GPIO_PIN07 = 64,GPIO_PIN08 = 128};
+enum GPIO_PIN{GPIO_PIN01 = 0,GPIO_PIN02 = 1,GPIO_PIN03 = 2,GPIO_PIN04 = 3,GPIO_PIN05 = 4,GPIO_PIN06 = 5,GPIO_PIN07 = 6,GPIO_PIN08 = 7};
 enum GPIO_STATE{GPIO_RESET = 0, GPIO_SET = 1};
 
 class I_ISFCarHAL
@@ -21,6 +21,7 @@ public:
     virtual int16_t getDesiredSpeed(void);
     virtual int16_t getDesiredSteeringAngle(void);
     virtual uint16_t getUsTime(void);
+    virtual uint16_t writeDataToBrainBoard(uint8_t* data, uint16_t len);
     virtual void writeGPIO(GPIO_STATE state, GPIO_PIN pin);
     virtual GPIO_STATE getGPIOState(GPIO_PIN pin);
 };

@@ -10,6 +10,10 @@
 #include "isfcarthread.h"
 #include <QTimer>
 
+#include "simulationconnectioncontroller.h"
+#include "brainboardcontroller.h"
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -29,7 +33,10 @@ private slots:
 
     void on_pushButtonSimulationConnection_clicked();
     void SimulationDataReceived(QByteArray data);
-    void BrainBoardDataReceived(QByteArray data);
+    void SimulationImageReceived(void);
+    //void BrainBoardDataReceived(QByteArray data);
+    void BrainBoardDataReceived();
+    void halDataToBrainBoardHost(QByteArray data);
 
     void on_pushButtonBrainBoardConnection_clicked();
 
@@ -39,11 +46,13 @@ private slots:
 private:
     Ui::MainWindow *ui;
     ISFCarHALx86 *_isfCarHAL;
-    TCPClientController *_tcpSimulation;
-    TCPClientController* _tcpBrainBoard;
-    DATA_SET_BRAIN_BOARD_UC_t _dataFromBrainBoard;
+    //TCPClientController *_tcpSimulation;
+    //TCPClientController* _tcpBrainBoardData;
+    //DATA_SET_BRAIN_BOARD_UC_t _dataFromBrainBoard;
     DATA_SET_TO_SIMULATION_t _dataToSimulation;
+    DATA_SET_UC_BRAIN_BOARD_t _dataToBrainBoardHost;
 
+    void simulationStepDone(void);
     void updateGUIData(void);
     void updateGUIDataLEDs(void);
     void getImageFromSimulation(void);
@@ -60,8 +69,11 @@ private:
     SIMULATION_STATE _currentSimulationState;
     bool _connectedToSimulation;
     bool _connectedToBrainBoard;
-    QImage _simulationViewImage;
-    QByteArray _simulationViewImageRAW;
+    //QImage _simulationViewImage;
+    //QByteArray _simulationViewImageRAW;
+
+    SimulationConnectionController* _simuConController;
+    BrainBoardController* _brainBoardController;
 };
 
 #endif // MAINWINDOW_H

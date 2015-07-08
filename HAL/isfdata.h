@@ -31,6 +31,7 @@ struct DATA_SET_BRAIN_BOARD_UC_t{
     uint32_t start_sequence = START_SEQUNCE;
     int32_t steering_angle = 0; //Grad
     int32_t speed_mms = 0; //mm/s
+    uint32_t gpio_state = 0;
     uint32_t end_sequence = END_SEQUNCE;
 };
 
@@ -42,6 +43,7 @@ struct DATA_SET_TO_SIMULATION_t{
     int32_t steering_angle = 0; //Grad
     int32_t speed_mms = 0; //mm/s
     uint32_t timediff = 0;
+    uint32_t gpio_state = 0;
     uint32_t end_sequence = END_SEQUNCE;
 };
 
@@ -57,6 +59,15 @@ struct DATA_SET_BRAIN_BOARD_t{
     int32_t speed_mms = 0; //mm/s
     int32_t steering_angle_pwm = 0; //Grad
     int32_t speed_pwm = 0; //mm/s
+};
+
+
+enum DATA_HEADER_TYPE{IMAGE_JPEG, SIMULATION_OUTPUT,};
+struct DATA_HEADER_SET{
+    uint32_t start_sequence;
+    DATA_HEADER_TYPE type;
+    uint32_t length;
+    uint32_t end_sequence;
 };
 
 #endif // ISFDATA
