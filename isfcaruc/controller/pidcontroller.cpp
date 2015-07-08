@@ -10,7 +10,6 @@
 PIDController::PIDController(float k_p, float k_i) {
 	// TODO Auto-generated constructor stub K_i = k_i;
 	  esum = 0.0;
-
 }
 
 PIDController::~PIDController() {

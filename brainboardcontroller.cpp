@@ -22,7 +22,28 @@ bool BrainBoardController::connectToDataHost(QString ip, uint port)
 }
 
 void BrainBoardController::sendData(QByteArray data){
-    _tcpBrainBoardImage->sendData(data);
+    int i = data.length();
+
+    QByteArray buffer;
+    buffer.resize(data.length()+4);
+    memcpy(buffer.data(),&i,4);
+    memcpy(buffer.data()+4,data.data(),data.length());
+
+    /*
+    QDataStream out(buffer.data_ptr());
+    out << int(0); // placeholder for info about bytes for the binary data
+    out << data; // binary representation of image (as PNG file)
+
+    out.device()->seek(0); // go back to start
+    out << buffer.size(); // info about bytes for the size value (int) and binary image data (image)
+    */
+    /*
+    if (_pSocket->write(buffer) < buffer.size()) {
+    qWarning("transmit error!");
+    }
+    */
+
+    _tcpBrainBoardImage->sendData(buffer);
 }
 
 void BrainBoardController::sendDataToHost(QByteArray data){

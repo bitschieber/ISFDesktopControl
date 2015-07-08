@@ -24,12 +24,15 @@ void SimulationConnectionController::SimulationDataReceived(QByteArray data)
     if(data.length()> sizeof(DATA_HEADER_SET))
     {
         memcpy(&header,data.data(),sizeof(DATA_HEADER_SET));
+        //if(header)
+            //_holeImagePacket
         data.remove(0,sizeof(DATA_HEADER_SET));
         if(header.type == IMAGE_JPEG)
         {
             if(data.length() >= header.length)
             {
                 _simulationViewImageRAW = data;
+                int i = _simulationViewImageRAW.length();
                 _simulationViewImage = QImage::fromData(_simulationViewImageRAW,"JPEG");//the second param is format name
                 emit imageReceived();
             }

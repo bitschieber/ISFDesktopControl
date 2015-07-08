@@ -23,6 +23,7 @@ signals:
     void imageReceived(void);
 private:
     TCPClientController *_tcpSimulation;
+    //QByteArray _holeImagePacket;
 };
 
 #endif // SIMULATIONCONNECTIONCONTROLLER_H

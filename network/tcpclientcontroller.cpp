@@ -23,11 +23,14 @@ void TCPClientController::readyRead()
 
 void TCPClientController::sendData(QByteArray data)
 {
+
     int result = _pSocket->write(data,data.length());
     if(result==-1)
     {
         //Error
     }
+
+
 }
 
 void TCPClientController::readTcpData()

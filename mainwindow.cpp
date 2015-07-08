@@ -103,6 +103,7 @@ void MainWindow::updateGUIData(void)
 
 void MainWindow::simulationStepDone(void)
 {
+    /*
     QCustomPlot *plotPWM = ui->plotPWM;
     if(plotDataStep>=100){
         plotPWM->graph(0)->removeData(plotDataStep-100);
@@ -132,7 +133,7 @@ void MainWindow::simulationStepDone(void)
     plotSteering->graph(1)->addData(plotDataStep,this->_isfCarHAL->getDesiredSteeringAngle());
     plotSteering->xAxis->rescale();
     plotSteering->replot();
-
+*/
 
     plotDataStep++;
 
