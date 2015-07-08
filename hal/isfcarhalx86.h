@@ -4,7 +4,7 @@
 
 #include <QObject>
 #include "i_isfcarhal.h"
-#include <math.h>
+#include <cmath>
 #include "hardware/motor/motorxtec1.h"
 #include "hardware/steering/steeringtrf417.h"
 

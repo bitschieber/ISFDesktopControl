@@ -2,7 +2,7 @@
 #define MOTORXTEC1_H
 
 #include "imotor.h"
-#include <math.h>
+#include <cmath>
 
 class MotorXTEC1 : public IMotor
 {

@@ -1,5 +1,5 @@
 #include "steeringcontroller.h"
-#include <math.h>
+#include <cmath>
 
 SteeringController::SteeringController()
 {
@@ -14,7 +14,7 @@ uint16_t SteeringController::steeringAngleToPWM(uint16_t angle)
     float maxAngle = 20;
 
     int pwm = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm/ abs(minAngle));
+    float anglePWM = (pwm/ std::abs(minAngle));
 
     return 1500 + (anglePWM * angle);
 }

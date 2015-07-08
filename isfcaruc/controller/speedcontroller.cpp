@@ -83,7 +83,7 @@ int16_t SpeedController::speedToPWM(int32_t speed) {
     //V1
     //float speedRange =  SPEED_MAX - SPEED_MIN;
     //float factor = pwmRange / speedRange;
-    //currentPWM = currentPWM + ((factor* abs(speed))*(speedError*0.9));
+    //currentPWM = currentPWM + ((factor* std::abs(speed))*(speedError*0.9));
 
     //V2
     currentPWM = currentPWM + (pwmRange * (speedError*0.5));

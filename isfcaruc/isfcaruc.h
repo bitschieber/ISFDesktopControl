@@ -1,7 +1,7 @@
 #ifndef ISFCARUC_H
 #define ISFCARUC_H
 
-#include "../HAL/i_isfcarhal.h"
+#include "../hal/i_isfcarhal.h"
 #include "controller/speedcontroller.h"
 #include "controller/steeringcontroller.h"
 #include <string.h>

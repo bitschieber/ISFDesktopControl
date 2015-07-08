@@ -22,4 +22,9 @@ void MonitorWindow::on_pushButtonBrainBoardConnection_clicked()
 void MonitorWindow::BrainBoardDataReceived(QByteArray data)
 {
     memcpy(&_dataSet,data,sizeof(DATA_SET_MONITOR_t));
+
+    ui->labelSpeedHardware->setText(QString::number(_dataSet.speed));
+    ui->labelSteeringAngleHardware->setText(QString::number(_dataSet.lenkwinkel));
+    //ui->labelSpeedHardwarePWM->setText((QString::number(this->_isfCarHAL->getMotorPWM())));
+    //ui->labelSteeringAngleHardwarePWM->setText((QString::number(this->_isfCarHAL->getSteeringAnglePWM())));
 }

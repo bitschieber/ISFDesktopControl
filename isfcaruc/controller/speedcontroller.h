@@ -10,7 +10,7 @@
 
 #include "pidcontroller.h"
 #include "../../hal/i_isfcarhal.h"
-#include <math.h>
+#include <cmath>
 
 #define SPEED_DELTA_PWM_STEP_UP		10
 #define SPEED_DELTA_PWM_STEP_DOWN	10

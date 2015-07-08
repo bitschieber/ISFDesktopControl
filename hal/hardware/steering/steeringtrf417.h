@@ -2,7 +2,7 @@
 #define STEERINGTRF417_H
 
 #include "isteering.h"
-#include <math.h>
+#include <cmath>
 
 class SteeringTRF417 : public ISteering
 {

@@ -12,7 +12,7 @@ uint16_t MotorXTEC1::calcSpeedFromPWM(uint16_t pwm){
     float maxSpeed = 4000;
 
     int pwm2 = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm2/ abs(minSpeed));
+    float anglePWM = (pwm2/ std::abs(minSpeed));
 
     return (pwm - 1500) / anglePWM;
 }
