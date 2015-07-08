@@ -22,6 +22,10 @@ ISFCarHALx86::ISFCarHALx86()
     this->_currentSteeringAnglePWM = 0;
     this->_currentUsTime = 0;
     this->_gpioStates = 0;
+
+    this->_isPWMInValid = false;
+    this->_currentPWMInSteering = 0;
+    this->_currentPWMInSpeed = 0;
 }
 
 void ISFCarHALx86::writeMotorPWM(uint16_t pwm){
@@ -114,7 +118,43 @@ uint16_t ISFCarHALx86::writeDataToBrainBoard(uint8_t* data, uint16_t len)
     QByteArray d;
     d.resize(len);
     memcpy(d.data(),data,len);
-    emit dataToBrainBoard(d);
+    emit sigDataToBrainBoard(d);
 
     return 0;
+}
+
+bool ISFCarHALx86::isPWMInValid(void)
+{
+    return this->_isPWMInValid;
+}
+
+uint16_t ISFCarHALx86::getPWMInValue(PWM_INPUT pwm)
+{
+    if(pwm == PWM_IN_STEERING)
+        return this->_currentPWMInSteering;
+    else if(pwm == PWM_IN_SPEED)
+        return this->_currentPWMInSpeed;
+
+    return 0;
+}
+
+void ISFCarHALx86::setPWMIn(PWM_INPUT pwm, uint16_t val)
+{
+    if(pwm == PWM_IN_STEERING)
+        this->_currentPWMInSteering = val;
+    else if(pwm == PWM_IN_SPEED)
+        this->_currentPWMInSpeed = val;
+}
+
+void ISFCarHALx86::setPWMInValid(bool valid)
+{
+    this->_isPWMInValid = valid;
+}
+
+void ISFCarHALx86::writeDebugLog(const char* data)
+{
+
+    QString d(data);
+    emit sigDebugLog(d);
+
 }

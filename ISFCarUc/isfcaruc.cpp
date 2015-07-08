@@ -1,30 +1,56 @@
 #include "isfcaruc.h"
-#include "QDebug"
-
-uint32_t _mainLoopTimeStamp = 0;
 
 ISFCarUc::ISFCarUc(I_ISFCarHAL *hal)
 {
     this->_isfCarHAL = hal;
     _speedController = new SpeedController(this->_isfCarHAL);
+    _steeringController = new SteeringController();
+    _mainLoopTimeStamp = 0;
+
+    this->_isfCarHAL->writeDebugLog("ISFCarUc initialized");
 }
 
-void ISFCarUc::Start(void){
-    while(1){
-        if(this->_isfCarHAL->getUsTime()-_mainLoopTimeStamp >= 5){
-            qDebug() << "MainLoop";
-            _mainLoopTimeStamp = this->_isfCarHAL->getUsTime();
-            //uint16_t newMotorPWM = _speedController->update(this->_isfCarHAL->getDesiredSpeed(),this->_isfCarHAL->getCurrentSpeed());
-            uint16_t newMotorPWM = _speedController->speedToPWM(this->_isfCarHAL->getDesiredSpeed());
-            this->_isfCarHAL->writeMotorPWM(newMotorPWM);
-            uint16_t newSteeringPWM = steeringAngleToPWM(this->_isfCarHAL->getDesiredSteeringAngle());
-            this->_isfCarHAL->writeSteeringPWM(newSteeringPWM);
+void ISFCarUc::stop(void){
+    _running = false;
+}
 
-            this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN01);
-            this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN02);
-            this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN04);
-            this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN06);
-            this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN07);
+void ISFCarUc::start(void){
+    _running = true;
+    this->_isfCarHAL->writeDebugLog("ISFCarUc Start");
+    while(_running){
+        if(this->_isfCarHAL->getUsTime()-_mainLoopTimeStamp >= 5){
+            _mainLoopTimeStamp = this->_isfCarHAL->getUsTime();
+
+            this->_isfCarHAL->writeDebugLog("ISFCarUc run MainLoop");
+            uint16_t newMotorPWM = 0;
+            uint16_t newSteeringPWM = 0;
+
+            if(this->_isfCarHAL->isPWMInValid()==true)
+            {
+                newMotorPWM = 0;
+                newSteeringPWM = 0;
+
+                this->_isfCarHAL->writeMotorPWM(newMotorPWM);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN01);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN02);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN04);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN06);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN07);
+            }
+            else
+            {
+                newMotorPWM = _speedController->speedToPWM(this->_isfCarHAL->getDesiredSpeed());
+                newSteeringPWM = _steeringController->steeringAngleToPWM(this->_isfCarHAL->getDesiredSteeringAngle());
+
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN01);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN02);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN04);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN06);
+                this->_isfCarHAL->writeGPIO(GPIO_SET,GPIO_PIN07);
+            }
+
+            this->_isfCarHAL->writeMotorPWM(newMotorPWM);
+            this->_isfCarHAL->writeSteeringPWM(newSteeringPWM);
 
             _dataToBrainBoardHost.speed_mms = this->_isfCarHAL->getCurrentSpeed();
             _dataToBrainBoardHost.speed_pwm = newMotorPWM;
@@ -36,33 +62,5 @@ void ISFCarUc::Start(void){
             this->_isfCarHAL->writeDataToBrainBoard(data,sizeof(DATA_SET_UC_BRAIN_BOARD_t));
         }
     }
-}
-
-/*
-uint16_t ISFCarUc::speedToPWM(uint16_t speed)
-{
-    int minPWM = 1100;
-    int maxPWM = 1900;
-    float minAngle = -4000;
-    float maxAngle = 4000;
-
-    int pwm = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm/ abs(minAngle));
-
-    return 1500 + (anglePWM * speed);
-}
-*/
-
-uint16_t ISFCarUc::steeringAngleToPWM(uint16_t angle)
-{
-    int minPWM = 1100;
-    int maxPWM = 1900;
-    float minAngle = -20;
-    float maxAngle = 20;
-
-    int pwm = (maxPWM-minPWM)/2;
-    float anglePWM = (pwm/ abs(minAngle));
-
-    return 1500 + (anglePWM * angle);
 }
 

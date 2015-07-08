@@ -37,15 +37,22 @@ private slots:
     //void BrainBoardDataReceived(QByteArray data);
     void BrainBoardDataReceived();
     void halDataToBrainBoardHost(QByteArray data);
+    void halDebugLog(QString str);
 
     void on_pushButtonBrainBoardConnection_clicked();
 
 
     void TimerWaitForISFRunFinished();
 
+    void on_pushButtonSimulationPlay_clicked();
+
 private:
     Ui::MainWindow *ui;
+    void closeEvent (QCloseEvent *event);
     ISFCarHALx86 *_isfCarHAL;
+    uint32_t _currentTimems;
+    uint32_t _lastImageUpdateTime;
+    bool _continuousPlay;
     //TCPClientController *_tcpSimulation;
     //TCPClientController* _tcpBrainBoardData;
     //DATA_SET_BRAIN_BOARD_UC_t _dataFromBrainBoard;
@@ -53,6 +60,7 @@ private:
     DATA_SET_UC_BRAIN_BOARD_t _dataToBrainBoardHost;
 
     void simulationStepDone(void);
+    void nextStep(void);
     void updateGUIData(void);
     void updateGUIDataLEDs(void);
     void getImageFromSimulation(void);

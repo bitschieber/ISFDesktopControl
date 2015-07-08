@@ -8,6 +8,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    _continuousPlay = false;
+    _currentTimems = 0;
+    _lastImageUpdateTime = 0;
+
     _simuConController = new SimulationConnectionController();
     connect(_simuConController, SIGNAL(imageReceived()), this, SLOT(SimulationImageReceived()));
 
@@ -20,12 +24,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _isfCarHAL = new ISFCarHALx86();
     //connect(tempHal, SIGNAL(dataToBrainBoard(QByteArray data)), this, SLOT(halDataToBrainBoardHost(QByteArray data)));
-    connect(_isfCarHAL, &ISFCarHALx86::dataToBrainBoard, this, &MainWindow::halDataToBrainBoardHost);
+    connect(_isfCarHAL, &ISFCarHALx86::sigDataToBrainBoard, this, &MainWindow::halDataToBrainBoardHost);
+    connect(_isfCarHAL, &ISFCarHALx86::sigDebugLog, this, &MainWindow::halDebugLog);
     //_isfCarHAL = tempHal;
     //_isfCarThread = new ISFCarThread(_isfCarHAL);
     //_isfCarThread->run();
 
     //QThread thread;
+    _isfCarThread = 0;
     _isfCarThread = new ISFCarThread(_isfCarHAL);
     _isfCarThread->start();
     //_isfCarThread->moveToThread(&thread);
@@ -48,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plotSpeed->addGraph();
     ui->plotSpeed->addGraph();
     ui->plotSpeed->yAxis->setRange(-4200,4200);
+
+    ui->plotSteeringAngle->addGraph();
+    ui->plotSteeringAngle->addGraph();
+    ui->plotSteeringAngle->yAxis->setRange(-22,22);
     //ui->plotPWM->yAxis->setRange(1000,2000);
     //ui->plotPWM->xAxis->setRange(0,10);
     //ui->plotPWM->
@@ -59,6 +69,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::closeEvent (QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this," APP_NAME",
+                                                                tr("Are you sure?\n"),
+                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                                QMessageBox::Yes);
+    if (resBtn != QMessageBox::Yes) {
+        event->ignore();
+    } else {
+
+        _isfCarThread->stopISFCar();
+        delete _isfCarThread;
+        delete _isfCarHAL;
+        delete _simuConController;
+        delete _brainBoardController;
+
+        event->accept();
+    }
+}
 
 
 void MainWindow::updateGUIData(void)
@@ -69,6 +98,7 @@ void MainWindow::updateGUIData(void)
     ui->labelSteeringAngleHardware->setText(QString::number(this->_isfCarHAL->getCurrentSteeringAngle()));
     ui->labelSpeedHardwarePWM->setText((QString::number(this->_isfCarHAL->getMotorPWM())));
     ui->labelSteeringAngleHardwarePWM->setText((QString::number(this->_isfCarHAL->getSteeringAnglePWM())));
+    ui->labelSimulationCurrentTime->setText(QString::number(this->_currentTimems));
 }
 
 void MainWindow::simulationStepDone(void)
@@ -80,25 +110,29 @@ void MainWindow::simulationStepDone(void)
     }
     plotPWM->graph(0)->addData(plotDataStep,this->_isfCarHAL->getMotorPWM());
     plotPWM->graph(1)->addData(plotDataStep,this->_isfCarHAL->getSteeringAnglePWM());
-    //plotPWM->rescaleAxes();
     plotPWM->xAxis->rescale();
-    //plotPWM->update();
     plotPWM->replot();
 
     QCustomPlot *plotSpeed = ui->plotSpeed;
     if(plotDataStep>=100){
         plotSpeed->graph(0)->removeData(plotDataStep-100);
-        //plotSpeed->graph(0)->rescaleKeyAxis();
         plotSpeed->graph(1)->removeData(plotDataStep-100);
-        //plotSpeed->graph(1)->rescaleKeyAxis();
     }
     plotSpeed->graph(0)->addData(plotDataStep,this->_isfCarHAL->getCurrentSpeed());
     plotSpeed->graph(1)->addData(plotDataStep,this->_isfCarHAL->getDesiredSpeed());
-    //plotSpeed->graph(0)->rescaleAxes();
-    //plotSpeed->graph(1)->rescaleAxes();
-    //plotSpeed->update();
     plotSpeed->xAxis->rescale();
     plotSpeed->replot();
+
+    QCustomPlot *plotSteering = ui->plotSteeringAngle;
+    if(plotSteering>=100){
+        plotSteering->graph(0)->removeData(plotDataStep-100);
+        plotSteering->graph(1)->removeData(plotDataStep-100);
+    }
+    plotSteering->graph(0)->addData(plotDataStep,this->_isfCarHAL->getCurrentSteeringAngle());
+    plotSteering->graph(1)->addData(plotDataStep,this->_isfCarHAL->getDesiredSteeringAngle());
+    plotSteering->xAxis->rescale();
+    plotSteering->replot();
+
 
     plotDataStep++;
 
@@ -119,6 +153,9 @@ void MainWindow::simulationStepDone(void)
     */
 
     updateGUIData();
+
+    if(_continuousPlay==true)
+        nextStep();
 }
 
 /*updateGUIDataLEDs
@@ -190,6 +227,11 @@ void MainWindow::halDataToBrainBoardHost(QByteArray data)
     {
         _brainBoardController->sendDataToHost(data);
     }
+}
+
+void MainWindow::halDebugLog(QString str)
+{
+    ui->labelDebugLog->append(str);
 }
 
 void MainWindow::on_pushButtonSimulationConnection_clicked()
@@ -289,8 +331,23 @@ void MainWindow::SimulationDataReceived(QByteArray data)
  */
 void MainWindow::on_pushButtonSimulationStepForward_clicked()
 {
+    nextStep();
+}
+
+void MainWindow::nextStep(void){
     if(_connectedToSimulation == true && _connectedToBrainBoard == true){ //Wenn zu beiden System verbunden wurde
-        sendImageToBrainBoard();
+
+        if(_currentTimems-_lastImageUpdateTime >= ui->labelSimulationImageUpdateTime->text().toUInt())
+        {
+            _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
+            _lastImageUpdateTime = _currentTimems;
+            sendImageToBrainBoard();
+        }
+        else{
+            _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
+            BrainBoardDataReceived();
+        }
+
     }
     else if(_connectedToSimulation == false){//Wenn die Verbidnung zur Simulation nicht besteht
         return;
@@ -341,6 +398,7 @@ void MainWindow::manipulateX68HAL(void)
     _isfCarHAL->setDesiredSpeed(_brainBoardController->_dataFromBrainBoard.speed_mms);
     _isfCarHAL->setDesiredSteeringAngle(_brainBoardController->_dataFromBrainBoard.steering_angle);
     _isfCarHAL->addUsTime(ui->labelSimulationTimeStep->text().toUInt());
+    _currentTimems = _isfCarHAL->getUsTime();
 }
 
 
@@ -367,3 +425,8 @@ void MainWindow::TimerWaitForISFRunFinished(){
     }
 }
 
+
+void MainWindow::on_pushButtonSimulationPlay_clicked()
+{
+    this->_continuousPlay = !this->_continuousPlay;
+}

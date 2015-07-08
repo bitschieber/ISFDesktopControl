@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     ISFCarUc/controller/speedcontroller.cpp \
     ISFCarUc/controller/PIDController.cpp \
     simulationconnectioncontroller.cpp \
-    brainboardcontroller.cpp
+    brainboardcontroller.cpp \
+    ISFCarUc/controller/steeringcontroller.cpp
 
 HEADERS  += mainwindow.h \
         qcustomplot.h \
@@ -51,7 +52,8 @@ HEADERS  += mainwindow.h \
     ISFCarUc/controller/speedcontroller.h \
     ISFCarUc/controller/PIDController.h \
     simulationconnectioncontroller.h \
-    brainboardcontroller.h
+    brainboardcontroller.h \
+    ISFCarUc/controller/steeringcontroller.h
 
 FORMS    += mainwindow.ui \
     startwindow.ui

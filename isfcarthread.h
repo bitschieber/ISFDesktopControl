@@ -12,6 +12,7 @@ class ISFCarThread : public QThread
     Q_OBJECT
 public:
     ISFCarThread(I_ISFCarHAL *hal);
+    void stopISFCar();
 private:
     ISFCarUc *_isfCarUc;
 protected:

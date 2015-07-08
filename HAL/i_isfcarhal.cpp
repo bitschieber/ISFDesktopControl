@@ -55,3 +55,18 @@ uint16_t I_ISFCarHAL::writeDataToBrainBoard(uint8_t* data, uint16_t len)
     return 0;
 }
 
+bool I_ISFCarHAL::isPWMInValid(void)
+{
+    return false;
+}
+
+uint16_t I_ISFCarHAL::getPWMInValue(PWM_INPUT pwm)
+{
+    return 0;
+}
+
+void I_ISFCarHAL::writeDebugLog(const char* data)
+{
+
+}
+

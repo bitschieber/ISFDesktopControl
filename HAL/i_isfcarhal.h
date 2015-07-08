@@ -6,6 +6,8 @@
 
 enum GPIO_PIN{GPIO_PIN01 = 0,GPIO_PIN02 = 1,GPIO_PIN03 = 2,GPIO_PIN04 = 3,GPIO_PIN05 = 4,GPIO_PIN06 = 5,GPIO_PIN07 = 6,GPIO_PIN08 = 7};
 enum GPIO_STATE{GPIO_RESET = 0, GPIO_SET = 1};
+enum PWM_INPUT{PWM_IN_STEERING, PWM_IN_SPEED};
+
 
 class I_ISFCarHAL
 {
@@ -24,6 +26,9 @@ public:
     virtual uint16_t writeDataToBrainBoard(uint8_t* data, uint16_t len);
     virtual void writeGPIO(GPIO_STATE state, GPIO_PIN pin);
     virtual GPIO_STATE getGPIOState(GPIO_PIN pin);
+    virtual bool isPWMInValid(void);
+    virtual uint16_t getPWMInValue(PWM_INPUT pwm);
+    virtual void writeDebugLog(const char* data);
 };
 
 #endif // I_ISFCARHAL_H
