@@ -46,6 +46,12 @@ private slots:
 
     void on_pushButtonSimulationPlay_clicked();
 
+    void on_cbRCOnOff_clicked(bool checked);
+
+    void on_cbUserButton01_clicked(bool checked);
+
+    void on_cbUserButton02_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     void closeEvent (QCloseEvent *event);

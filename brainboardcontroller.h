@@ -1,7 +1,7 @@
 #ifndef BRAINBOARDCONTROLLER_H
 #define BRAINBOARDCONTROLLER_H
 
-#include <QObject>;
+#include <QObject>
 #include "network/tcpclientcontroller.h"
 #include "hal/isfdata.h"
 

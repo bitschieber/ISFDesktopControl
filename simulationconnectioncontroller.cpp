@@ -32,7 +32,7 @@ void SimulationConnectionController::SimulationDataReceived(QByteArray data)
             if(data.length() >= header.length)
             {
                 _simulationViewImageRAW = data;
-                int i = _simulationViewImageRAW.length();
+                //int i = _simulationViewImageRAW.length();
                 _simulationViewImage = QImage::fromData(_simulationViewImageRAW,"JPEG");//the second param is format name
                 emit imageReceived();
             }

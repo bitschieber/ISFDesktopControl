@@ -52,7 +52,7 @@ void BrainBoardController::sendDataToHost(QByteArray data){
 
 void BrainBoardController::BrainBoardDataReceived(QByteArray data)
 {
-    int i = 0;
+    //int i = 0;
     //memcpy(&_dataFromBrainBoard,data,sizeof(DATA_SET_BRAIN_BOARD_UC_t));
     //emit dataReceived();
 }

@@ -29,8 +29,7 @@ public:
     SpeedController(I_ISFCarHAL *hal);
 	virtual ~SpeedController();
 	uint32_t updateSpeedPWM(uint32_t desiredPWM);
-	int16_t speedToPWM(int32_t speed);
-    int16_t speedToPWM2(int32_t speed);
+    int16_t speedToPWM(int32_t speed);
 	int32_t getCurrentSpeed();
 	int32_t getAverageSpeed();
 	void reset(void);

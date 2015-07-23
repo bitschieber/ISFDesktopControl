@@ -23,8 +23,9 @@ private slots:
 
 private:
     Ui::MonitorWindow *ui;
+    void updateGUIDataLEDs(uint32_t gpio_state);
     TCPClientController* _brainBoardClient;
-    DATA_SET_MONITOR_t _dataSet;
+    DATA_SET_BRAIN_BOARD_UC_t _dataSet;
 };
 
 #endif // MONITORWINDOW_H

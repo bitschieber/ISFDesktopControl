@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     simulationconnectioncontroller.cpp \
     brainboardcontroller.cpp \
     isfcaruc/controller/steeringcontroller.cpp \
-    monitorwindow.cpp
+    monitorwindow.cpp \
+    isfcaruc/controller/isftimer.cpp
 
 HEADERS  += mainwindow.h \
         qcustomplot.h \
@@ -55,7 +56,8 @@ HEADERS  += mainwindow.h \
     isfcaruc/controller/pidcontroller.h \
     network/tcpclientcontroller.h \
     network/tcpservercontroller.h \
-    monitorwindow.h
+    monitorwindow.h \
+    isfcaruc/controller/isftimer.h
 
 FORMS    += mainwindow.ui \
     startwindow.ui \

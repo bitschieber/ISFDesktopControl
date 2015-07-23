@@ -20,11 +20,7 @@ public:
     void writeMotorPWM(uint16_t pwm);
     void writeSteeringPWM(uint16_t pwm);
     void writeGPIO(GPIO_STATE state, GPIO_PIN pin);
-    int16_t getCurrentSpeed(void);
     int16_t getAverageSpeed(void);
-    int16_t getCurrentSteeringAngle(void);
-    int16_t getDesiredSpeed(void);
-    int16_t getDesiredSteeringAngle(void);
     uint16_t getUsTime(void);
     uint16_t writeDataToBrainBoard(uint8_t* data, uint16_t len);
     GPIO_STATE getGPIOState(GPIO_PIN pin);
@@ -32,33 +28,26 @@ public:
     uint16_t getPWMInValue(PWM_INPUT pwm);
     void writeDebugLog(const char* data);
 
-    //HardwarModels
+    //HardwareModels
     IMotor *_motor;
     ISteering *_steering;
 
     //HAL Manipulation Functions
     void addUsTime(uint16_t us);
-    void setDesiredSpeed(int16_t speed);
-    void setDesiredSteeringAngle(int16_t angle);
     uint16_t getMotorPWM();
     uint16_t getSteeringAnglePWM();
     uint16_t getGPIOs();
-    void setPWMInValid(bool valid);
-    void setPWMIn(PWM_INPUT pwm, uint16_t val);
-
-    //HAL Manipulation Variables
-    int16_t _desiredSpeed;
-    int16_t _desiredSteeringAngle;
-    int16_t _currentSpeed;
-    int16_t _currentSteeringAngle;
+    void manipulatePWMInValid(bool valid);
+    void manipulatePWMIn(PWM_INPUT pwm, uint16_t val);
+    void manipulateGPIOIn(GPIO_INPUT gpio, GPIO_STATE state);
 private:
     uint16_t _gpioStates;
-    uint32_t _currentUsTime;
     uint16_t _currentMotorPWM;
     uint16_t _currentSteeringAnglePWM;
     uint16_t _currentPWMInSteering;
     uint16_t _currentPWMInSpeed;
     bool     _isPWMInValid;
+    uint16_t _gpioInputStates;
 signals:
     void sigDataToBrainBoard(QByteArray data);
     void sigDebugLog(QString str);

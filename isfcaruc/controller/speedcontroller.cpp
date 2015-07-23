@@ -7,7 +7,7 @@
 
 #include "speedcontroller.h"
 
-PIController controller(0.9, 0.7);
+PIController controller(0.9f, 0.7f);
 //HallSensor hall = 0;
 
 SpeedController::SpeedController(I_ISFCarHAL *hal) {
@@ -86,7 +86,7 @@ int16_t SpeedController::speedToPWM(int32_t speed) {
     //currentPWM = currentPWM + ((factor* std::abs(speed))*(speedError*0.9));
 
     //V2
-    currentPWM = currentPWM + (pwmRange * (speedError*0.5));
+    currentPWM = currentPWM + uint32_t(pwmRange * (speedError*0.5));
 
 
     //this->currentPWM
@@ -95,25 +95,5 @@ int16_t SpeedController::speedToPWM(int32_t speed) {
 
 
     return currentPWM;
-}
-
-int16_t SpeedController::speedToPWM2(int32_t speed) {
-
-    int16_t newPWM = 1500;
-    /*
-    float speedError = (float(speed) - float(_hal->getAverageSpeed())) / float(SPEED_MAX - SPEED_MIN);
-    //float speedError = (float(speed) - float(hall.getCurrentSpeed())) / float(SPEED_MAX - SPEED_MIN);
-
-    // Old Version
-    // float pwmStep = speedError * (SERVO_MAX - SERVO_MIN) * 0.05;
-    // currentPwm += pwmStep;
-
-    // Controller Version
-    float targetPwm = currentPWM + speedError * (SERVO_MAX - SERVO_MIN);
-    currentPWM = SERVO_MIN + controller.tick((targetPwm - currentPWM));
-    newPWM = currentPWM;
-
-    */
-    return newPWM;
 }
 

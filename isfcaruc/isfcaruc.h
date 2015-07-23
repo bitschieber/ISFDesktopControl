@@ -1,10 +1,12 @@
 #ifndef ISFCARUC_H
 #define ISFCARUC_H
+#include <string.h>
 
 #include "../hal/i_isfcarhal.h"
 #include "controller/speedcontroller.h"
 #include "controller/steeringcontroller.h"
-#include <string.h>
+#include "controller/isftimer.h"
+
 
 
 class ISFCarUc
@@ -15,6 +17,8 @@ public:
     void stop(void);
 private:
     I_ISFCarHAL *_isfCarHAL;
+    ISFTimer* _timerMainLoop;
+    ISFTimer* _timerLights;
     bool _running;
     uint32_t _mainLoopTimeStamp;
     //uint16_t speedToPWM(uint16_t speed);

@@ -103,7 +103,7 @@ void MainWindow::updateGUIData(void)
 
 void MainWindow::simulationStepDone(void)
 {
-    /*
+
     QCustomPlot *plotPWM = ui->plotPWM;
     if(plotDataStep>=100){
         plotPWM->graph(0)->removeData(plotDataStep-100);
@@ -133,7 +133,7 @@ void MainWindow::simulationStepDone(void)
     plotSteering->graph(1)->addData(plotDataStep,this->_isfCarHAL->getDesiredSteeringAngle());
     plotSteering->xAxis->rescale();
     plotSteering->replot();
-*/
+
 
     plotDataStep++;
 
@@ -430,4 +430,33 @@ void MainWindow::TimerWaitForISFRunFinished(){
 void MainWindow::on_pushButtonSimulationPlay_clicked()
 {
     this->_continuousPlay = !this->_continuousPlay;
+}
+
+void MainWindow::on_cbRCOnOff_clicked(bool checked)
+{
+    this->_isfCarHAL->manipulatePWMInValid(checked);
+}
+
+void MainWindow::on_cbUserButton01_clicked(bool checked)
+{
+    if(checked==true)
+    {
+        this->_isfCarHAL->manipulateGPIOIn(GPIO_IN_USERBUTTON_01,GPIO_SET);
+    }
+    else
+    {
+        this->_isfCarHAL->manipulateGPIOIn(GPIO_IN_USERBUTTON_01,GPIO_RESET);
+    }
+}
+
+void MainWindow::on_cbUserButton02_clicked(bool checked)
+{
+    if(checked==true)
+    {
+        this->_isfCarHAL->manipulateGPIOIn(GPIO_IN_USERBUTTON_02,GPIO_SET);
+    }
+    else
+    {
+        this->_isfCarHAL->manipulateGPIOIn(GPIO_IN_USERBUTTON_02,GPIO_RESET);
+    }
 }
