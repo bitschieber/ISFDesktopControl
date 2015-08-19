@@ -46,7 +46,7 @@ void MonitorWindow::on_pushButtonBrainBoardConnection_clicked()
 
 void MonitorWindow::BrainBoardDataReceived(QByteArray data)
 {
-    memcpy(&_dataSet,data,sizeof(DATA_SET_BRAIN_BOARD_UC_t));
+    memcpy(&_dataSet,data,sizeof(DATA_SET_TO_MONITOR_t));
 
     if(_dataSet.start_sequence == START_SEQUNCE && _dataSet.end_sequence==END_SEQUNCE)
     {
