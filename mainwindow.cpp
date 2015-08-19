@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 
 uint32_t plotDataStep = 0;
+TIME_MESSUREMENT_STUCT _timeISFRunMessure;
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -13,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _lastImageUpdateTime = 0;
 
     _simuConController = new SimulationConnectionController();
-    connect(_simuConController, SIGNAL(imageReceived()), this, SLOT(SimulationImageReceived()));
+    connect(_simuConController, SIGNAL(imageReceived(QImage)), this, SLOT(SimulationImageReceived(QImage)));
+    connect(_simuConController, SIGNAL(dataReceived(QByteArray)), this, SLOT(SimulationDataReceived(QByteArray)));
 
     _brainBoardController = new BrainBoardController();
     connect(_brainBoardController, SIGNAL(dataReceived()), this, SLOT(BrainBoardDataReceived()));
@@ -38,8 +42,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //thread.start();
 
     _currentSimulationState = SIMUSTATE_IDLE;
+    this->simulationStateMachine(SIMSIGNAL_UNKNOWN);
 
     ui->graphicsViewSimulationView->setScene(&_simulationViewScene);
+    _simuImagePixMap= new QGraphicsPixmapItem();
+    _simulationViewScene.addItem(_simuImagePixMap);
 
     _timerWaitForISFRun.setInterval(2);
     connect(&_timerWaitForISFRun,&QTimer::timeout,this,&MainWindow::TimerWaitForISFRunFinished);
@@ -104,6 +111,7 @@ void MainWindow::updateGUIData(void)
 void MainWindow::simulationStepDone(void)
 {
 
+
     QCustomPlot *plotPWM = ui->plotPWM;
     if(plotDataStep>=100){
         plotPWM->graph(0)->removeData(plotDataStep-100);
@@ -135,12 +143,16 @@ void MainWindow::simulationStepDone(void)
     plotSteering->replot();
 
 
+
+
     plotDataStep++;
 
     _dataToBrainBoardHost.speed_mms = this->_isfCarHAL->getCurrentSpeed();
     _dataToBrainBoardHost.speed_pwm = this->_isfCarHAL->getMotorPWM();
     _dataToBrainBoardHost.steering_angle_pwm = this->_isfCarHAL->getSteeringAnglePWM();
     _dataToBrainBoardHost.steering_angle = this->_isfCarHAL->getCurrentSteeringAngle();
+
+    qDebug() << "ISFRun Duration:" << _timeISFRunMessure.diffMs;
 
 
     /*
@@ -279,12 +291,18 @@ void MainWindow::on_pushButtonBrainBoardConnection_clicked()
 }
 
 
-void MainWindow::SimulationImageReceived(void)
+void MainWindow::SimulationImageReceived(QImage img)
 {
     _currentSimulationState = SIMUSTATE_IDLE;
-    _simulationViewScene.addPixmap(QPixmap().fromImage(_simuConController->_simulationViewImage));
-    ui->graphicsViewSimulationView->show();
+    simulationStateMachine(SIMSIGNAL_UNKNOWN);
 
+    QPixmap lpixmap = QPixmap::fromImage(img);
+    _simuImagePixMap->setPixmap(lpixmap);
+
+    //_simulationViewScene.addPixmap(QPixmap().fromImage(img));
+    //_simulationViewScene.rem
+    ui->graphicsViewSimulationView->show();
+    //_simuConController->freeImage();
     simulationStepDone();
 }
 
@@ -307,20 +325,6 @@ void MainWindow::getImageFromSimulation(void)
 }
 void MainWindow::SimulationDataReceived(QByteArray data)
 {
-    /*
-    if(data.length()>1000){
-        _simuConController->_simulationViewImageRAW = data;
-        _simuConController->_simulationViewImage = QImage::fromData(_simulationViewImageRAW,"JPEG");//the second param is format name
-        _currentSimulationState = SIMUSTATE_IDLE;
-        _simulationViewScene.addPixmap(QPixmap().fromImage(_simulationViewImage));
-        ui->graphicsViewSimulationView->show();
-
-        simulationStepDone();
-    }
-    else{
-            getImageFromSimulation();
-    }
-    */
 }
 
 
@@ -341,11 +345,13 @@ void MainWindow::nextStep(void){
         if(_currentTimems-_lastImageUpdateTime >= ui->labelSimulationImageUpdateTime->text().toUInt())
         {
             _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
+            this->simulationStateMachine(SIMSIGNAL_UNKNOWN);
             _lastImageUpdateTime = _currentTimems;
             sendImageToBrainBoard();
         }
         else{
             _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
+            this->simulationStateMachine(SIMSIGNAL_UNKNOWN);
             BrainBoardDataReceived();
         }
 
@@ -364,6 +370,7 @@ void MainWindow::nextStep(void){
 void MainWindow::sendImageToBrainBoard(void)
 {
     _currentSimulationState = SIMUSTATE_BRAINBOARD_SENDIMAGE;
+    this->simulationStateMachine(SIMSIGNAL_UNKNOWN);
     _brainBoardController->sendData(_simuConController->_simulationViewImageRAW);
 }
 
@@ -376,13 +383,16 @@ void MainWindow::BrainBoardDataReceived()
     if(_currentSimulationState == SIMUSTATE_BRAINBOARD_SENDIMAGE)
     {
         _currentSimulationState = SIMUSTATE_BRAINBOARD_RECEIVED;
+        this->simulationStateMachine(SIMSIGNAL_UNKNOWN);
 
         ui->labelSpeedFromBrainBoard->setText(QString::number(_brainBoardController->_dataFromBrainBoard.speed_mms));
         ui->labelSteeringAngleFromBrainBoard->setText(QString::number(_brainBoardController->_dataFromBrainBoard.steering_angle));
 
         manipulateX68HAL();
 
+        this->simulationStateMachine(SIMSIGNAL_START_ISFRUN);
         _currentSimulationState = SIMUSTATE_WAIT_FOR_ISF_RUN;
+
         _timerWaitForISFRun.start();
 
     }
@@ -408,7 +418,8 @@ void MainWindow::manipulateX68HAL(void)
  */
 void MainWindow::TimerWaitForISFRunFinished(){
     _timerWaitForISFRun.stop();
-
+    simulationStateMachine(SIMSIGNAL_ISFRUN_TIMER_FINISHED);
+    /*
     if(_currentSimulationState == SIMUSTATE_WAIT_FOR_ISF_RUN){
         _dataToSimulation.command = SIMUCOM_UPDATE_DATA;
         _dataToSimulation.speed_mms = _isfCarHAL->getCurrentSpeed();
@@ -422,8 +433,10 @@ void MainWindow::TimerWaitForISFRunFinished(){
         memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
         _simuConController->sendData(sendData);
 
-        _currentSimulationState = SIMUSTATE_SIMULATION_UPDATE_DATA;
+        simulationStateMachine(SIMSIGNAL_ISFRUN_TIMER_FINISHED);
+        //_currentSimulationState = SIMUSTATE_SIMULATION_UPDATE_DATA;
     }
+    */
 }
 
 
@@ -459,4 +472,55 @@ void MainWindow::on_cbUserButton02_clicked(bool checked)
     {
         this->_isfCarHAL->manipulateGPIOIn(GPIO_IN_USERBUTTON_02,GPIO_RESET);
     }
+}
+
+void MainWindow::simulationStateMachine(SIMULATION_SIGNAL signal)
+{
+    if(_currentSimulationState == SIMUSTATE_SIMULATION_UPDATE_DATA)
+    {
+
+    }
+    else if(_currentSimulationState == SIMUSTATE_IDLE)
+    {
+
+    }
+    else if(_currentSimulationState == SIMUSTATE_BRAINBOARD_SENDIMAGE)
+    {
+    }
+    else if(_currentSimulationState == SIMUSTATE_BRAINBOARD_RECEIVED)
+    {
+        if(signal == SIMSIGNAL_START_ISFRUN)
+        {
+            _timeISFRunMessure.lastTime.start();
+        }
+    }
+    else if(_currentSimulationState == SIMUSTATE_WAIT_FOR_ISF_RUN)
+    {
+        if(signal == SIMSIGNAL_ISFRUN_TIMER_FINISHED)
+        {
+            _timeISFRunMessure.diffMs = _timeISFRunMessure.lastTime.elapsed();
+
+            _dataToSimulation.command = SIMUCOM_UPDATE_DATA;
+            _dataToSimulation.speed_mms = _isfCarHAL->getCurrentSpeed();
+            _dataToSimulation.steering_angle = _isfCarHAL->getCurrentSteeringAngle();
+            _dataToSimulation.timediff = ui->labelSimulationTimeStep->text().toUInt();
+            _dataToSimulation.gpio_state = _isfCarHAL->getGPIOs();
+
+            QByteArray sendData;
+
+            sendData.resize(sizeof(DATA_SET_TO_SIMULATION_t));
+            memcpy(sendData.data(),&_dataToSimulation,sizeof(DATA_SET_TO_SIMULATION_t));
+            _simuConController->sendData(sendData);
+
+            _currentSimulationState = SIMUSTATE_SIMULATION_UPDATE_DATA;
+        }
+    }
+
+    //_currentSimulationState = state;
+}
+
+void MainWindow::on_sliderADC1_valueChanged(int value)
+{
+    ui->labelADC1Val->setText(QString::number(value)+ " mV");
+    this->_isfCarHAL->manipulateADC(ADC_SRC::ADC_SRC_1, value);
 }

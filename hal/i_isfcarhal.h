@@ -14,6 +14,8 @@ enum GPIO_INPUT{
 enum GPIO_STATE{GPIO_RESET = 0, GPIO_SET = 1, GPIO_TOGGLE = 2};
 enum PWM_INPUT{PWM_IN_STEERING, PWM_IN_SPEED};
 
+enum ADC_SRC{ADC_SRC_1, ADC_SRC_2};
+
 
 class I_ISFCarHAL
 {
@@ -36,6 +38,7 @@ public:
     virtual bool isPWMInValid(void) = 0;
     virtual uint16_t getPWMInValue(PWM_INPUT pwm) = 0;
     virtual void writeDebugLog(const char* data) = 0;
+    virtual uint16_t readADCValue(ADC_SRC src) = 0;
 
     int16_t getDesiredSpeed(void);
     int16_t getDesiredSteeringAngle(void);

@@ -9,7 +9,7 @@ I_ISFCarHAL::I_ISFCarHAL()
 }
 
 int16_t I_ISFCarHAL::getCurrentSpeed(void){
-    return 0;
+    return this->_currentSpeed;
 }
 void I_ISFCarHAL::setCurrentSpeed(int16_t speed)
 {
@@ -17,11 +17,11 @@ void I_ISFCarHAL::setCurrentSpeed(int16_t speed)
 }
 
 int16_t I_ISFCarHAL::getAverageSpeed(void){
-    return  0;
+    return this->_currentSpeed;
 }
 
 int16_t I_ISFCarHAL::getCurrentSteeringAngle(void){
-    return 0;
+    return this->_currentSteeringAngle;
 }
 void I_ISFCarHAL::setCurrentSteeringAngle(int16_t angle)
 {

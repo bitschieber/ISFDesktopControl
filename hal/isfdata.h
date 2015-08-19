@@ -30,8 +30,8 @@ struct DATA_SET_UC_BRAIN_BOARD_t{
 struct DATA_SET_BRAIN_BOARD_UC_t{
     uint32_t start_sequence = START_SEQUNCE;
     int32_t steering_angle = 0; //Grad
-    //int32_t mouse_sensor_dx = 0;
-    //int32_t mouse_sensor_dy = 0;
+    int32_t mouse_sensor_dx = 0;
+    int32_t mouse_sensor_dy = 0;
     int32_t speed_mms = 0; //mm/s
     uint32_t gpio_state = 0;
     uint32_t end_sequence = END_SEQUNCE;
@@ -64,7 +64,7 @@ struct DATA_SET_BRAIN_BOARD_t{
 };
 
 
-enum DATA_HEADER_TYPE{IMAGE_JPEG, SIMULATION_OUTPUT,};
+enum DATA_HEADER_TYPE{IMAGE_JPEG, SIMULATION_OUTPUT};
 struct DATA_HEADER_SET{
     uint32_t start_sequence;
     DATA_HEADER_TYPE type;

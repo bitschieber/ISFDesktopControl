@@ -9,10 +9,15 @@
 #include <QGraphicsScene>
 #include "isfcarthread.h"
 #include <QTimer>
+#include <QTime>
 
 #include "simulationconnectioncontroller.h"
 #include "brainboardcontroller.h"
 
+struct TIME_MESSUREMENT_STUCT{
+    QTime lastTime;
+    uint32_t diffMs = 0;
+};
 
 namespace Ui {
 class MainWindow;
@@ -23,7 +28,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     enum SIMULATION_STATE{SIMUSTATE_IDLE, SIMUSTATE_REQUEST_SIMU_VIEW, SIMUSTATE_RECEIVED_SIMU_VIEW, SIMUSTATE_SIMULATION_UPDATE_DATA, SIMUSTATE_WAIT_FOR_ISF_RUN, SIMUSTATE_BRAINBOARD_SENDIMAGE, SIMUSTATE_BRAINBOARD_RECEIVED, SIMUSTATE_STEP_DONE};
-
+    enum SIMULATION_SIGNAL{SIMSIGNAL_UNKNOWN, SIMSIGNAL_ISFRUN_TIMER_FINISHED, SIMSIGNAL_START_ISFRUN};
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -33,24 +38,19 @@ private slots:
 
     void on_pushButtonSimulationConnection_clicked();
     void SimulationDataReceived(QByteArray data);
-    void SimulationImageReceived(void);
-    //void BrainBoardDataReceived(QByteArray data);
+    void SimulationImageReceived(QImage img);
     void BrainBoardDataReceived();
     void halDataToBrainBoardHost(QByteArray data);
     void halDebugLog(QString str);
-
     void on_pushButtonBrainBoardConnection_clicked();
-
-
     void TimerWaitForISFRunFinished();
-
     void on_pushButtonSimulationPlay_clicked();
-
     void on_cbRCOnOff_clicked(bool checked);
-
     void on_cbUserButton01_clicked(bool checked);
-
     void on_cbUserButton02_clicked(bool checked);
+    void simulationStateMachine(SIMULATION_SIGNAL signal);
+
+    void on_sliderADC1_valueChanged(int value);
 
 private:
     Ui::MainWindow *ui;
@@ -73,6 +73,7 @@ private:
 
     QTimer _timerWaitForISFRun;
     QGraphicsScene _simulationViewScene;
+    QGraphicsPixmapItem* _simuImagePixMap;
 
     //Simulation
     void sendImageToBrainBoard(void);

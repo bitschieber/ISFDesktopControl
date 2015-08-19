@@ -1,5 +1,8 @@
 #include "brainboardcontroller.h"
 
+
+QByteArray buffer;
+
 BrainBoardController::BrainBoardController()
 {
 
@@ -24,7 +27,6 @@ bool BrainBoardController::connectToDataHost(QString ip, uint port)
 void BrainBoardController::sendData(QByteArray data){
     int i = data.length();
 
-    QByteArray buffer;
     buffer.resize(data.length()+4);
     memcpy(buffer.data(),&i,4);
     memcpy(buffer.data()+4,data.data(),data.length());

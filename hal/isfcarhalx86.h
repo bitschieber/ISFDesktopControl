@@ -27,6 +27,8 @@ public:
     bool isPWMInValid(void);
     uint16_t getPWMInValue(PWM_INPUT pwm);
     void writeDebugLog(const char* data);
+    uint16_t readADCValue(ADC_SRC src);
+
 
     //HardwareModels
     IMotor *_motor;
@@ -40,6 +42,7 @@ public:
     void manipulatePWMInValid(bool valid);
     void manipulatePWMIn(PWM_INPUT pwm, uint16_t val);
     void manipulateGPIOIn(GPIO_INPUT gpio, GPIO_STATE state);
+    void manipulateADC(ADC_SRC src, uint16_t val);
 private:
     uint16_t _gpioStates;
     uint16_t _currentMotorPWM;
@@ -48,6 +51,10 @@ private:
     uint16_t _currentPWMInSpeed;
     bool     _isPWMInValid;
     uint16_t _gpioInputStates;
+    uint16_t _adc_src_1_val; // Value of the ADC1
+    uint16_t _adc_src_2_val; // Value of the ADC2
+
+
 signals:
     void sigDataToBrainBoard(QByteArray data);
     void sigDebugLog(QString str);
