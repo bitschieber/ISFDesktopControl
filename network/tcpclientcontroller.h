@@ -13,6 +13,7 @@ class TCPClientController : public QObject
 public:
     explicit TCPClientController(QObject *parent = 0, QString ip = "127.0.0.1", quint16 port = 8080);
     void sendData(QByteArray data);
+    bool isConnected();
     //QImage getImage();
     //DATA_SET_BRAIN_BOARD_UC_t data;
     //int averageCounter;

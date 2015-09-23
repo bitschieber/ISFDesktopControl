@@ -16,6 +16,9 @@ void SimulationConnectionController::sendData(QByteArray data){
     _tcpSimulation->sendData(data);
 }
 
+bool SimulationConnectionController::isConnected(){
+    return _tcpSimulation->isConnected();
+}
 
 void SimulationConnectionController::SimulationDataReceived(QByteArray data)
 {

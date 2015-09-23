@@ -24,10 +24,12 @@ struct DATA_SET_UC_BRAIN_BOARD_t{
 
 //Struktur für die Übertragung von ISFCarBrainBoard zu ISFCarLogic
 struct DATA_SET_BRAIN_BOARD_UC_t{
-    uint32_t start_sequence = START_SEQUNCE;
-    int32_t steering_angle = 0; //Grad
-    int32_t speed_mms = 0; //mm/s
-    uint32_t end_sequence = END_SEQUNCE;
+    uint8_t start_sequence = START_SEQUNCE;
+    uint8_t sequenznumber = 0;
+    uint8_t checksum = 0;
+    float steering_angle = 0; //Grad
+    int16_t speed_mms = 0; //mm/s
+    uint8_t end_sequence = END_SEQUNCE;
 };
 
 //Struktur für die Übertragung zu ISFCarDesktop im Monitor-Modi

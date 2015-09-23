@@ -44,6 +44,7 @@ private slots:
     void halDebugLog(QString str);
     void on_pushButtonBrainBoardConnection_clicked();
     void TimerWaitForISFRunFinished();
+    void TimerCheckNetworkStates();
     void on_pushButtonSimulationPlay_clicked();
     void on_cbRCOnOff_clicked(bool checked);
     void on_cbUserButton01_clicked(bool checked);
@@ -72,6 +73,7 @@ private:
     void getImageFromSimulation(void);
 
     QTimer _timerWaitForISFRun;
+    QTimer _timerCheckNetworkStates;
     QGraphicsScene _simulationViewScene;
     QGraphicsPixmapItem* _simuImagePixMap;
 

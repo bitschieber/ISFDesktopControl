@@ -28,6 +28,7 @@ ISFCarHALx86::ISFCarHALx86()
 void ISFCarHALx86::writeMotorPWM(uint16_t pwm){
     this->_currentMotorPWM = pwm;
     this->setCurrentSpeed(_motor->calcSpeedFromPWM(this->_currentMotorPWM));
+    //this->setCurrentSpeed(10);
 }
 
 void ISFCarHALx86::writeSteeringPWM(uint16_t pwm){

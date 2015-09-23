@@ -33,6 +33,16 @@ void TCPClientController::sendData(QByteArray data)
 
 }
 
+bool TCPClientController::isConnected(){
+
+    if(_pSocket!=NULL){
+        bool connected = (_pSocket->state() == QTcpSocket::ConnectedState);
+        return connected;
+    }
+
+    return false;
+}
+
 void TCPClientController::readTcpData()
 {
     QByteArray d = _pSocket->readAll();

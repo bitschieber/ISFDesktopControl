@@ -51,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _timerWaitForISFRun.setInterval(2);
     connect(&_timerWaitForISFRun,&QTimer::timeout,this,&MainWindow::TimerWaitForISFRunFinished);
 
+    _timerCheckNetworkStates.setInterval(500);
+    connect(&_timerCheckNetworkStates,&QTimer::timeout,this,&MainWindow::TimerCheckNetworkStates);
+
 
     //Plots
     ui->plotPWM->addGraph();
@@ -69,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->plotPWM->xAxis->setRange(0,10);
     //ui->plotPWM->
     updateGUIData();
+
+
 }
 
 MainWindow::~MainWindow()
@@ -85,7 +90,7 @@ void MainWindow::closeEvent (QCloseEvent *event)
     if (resBtn != QMessageBox::Yes) {
         event->ignore();
     } else {
-
+        _timerCheckNetworkStates.stop();
         _isfCarThread->stopISFCar();
         delete _isfCarThread;
         delete _isfCarHAL;
@@ -255,6 +260,7 @@ void MainWindow::on_pushButtonSimulationConnection_clicked()
     if(_simuConController->connectToSimulation(ui->lineEditSimulationIP->text(),ui->lineEditSimulationPort->text().toUInt()))
     {
         _connectedToSimulation = true;
+        ui->labelConnectionStateSimu->setText("Connected");
 
         _dataToSimulation.command = SIMUCOM_SEND_IMAGE;
 
@@ -266,6 +272,7 @@ void MainWindow::on_pushButtonSimulationConnection_clicked()
         _simuConController->sendData(sendData);
     }
 
+    _timerCheckNetworkStates.start();
     //connect(ui->btnConnectSimulationCamera, SIGNAL(clicked()),this, SLOT(SimulationCameraClickedSlot()));
 }
 
@@ -412,6 +419,18 @@ void MainWindow::manipulateX68HAL(void)
     _currentTimems = _isfCarHAL->getUsTime();
 }
 
+/*
+ * Waitingtime for HAL ISFCar Calculation finished
+ */
+void MainWindow::TimerCheckNetworkStates(){
+    //_timerCheckNetworkStates.stop();
+    if(_simuConController->isConnected()){
+        ui->labelConnectionStateSimu->setText("Connected");
+    }
+    else{
+        ui->labelConnectionStateSimu->setText("Not Connected");
+    }
+}
 
 /*
  * Waitingtime for HAL ISFCar Calculation finished

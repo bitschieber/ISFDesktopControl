@@ -13,6 +13,7 @@ public:
     SimulationConnectionController();
     bool connectToSimulation(QString ip, uint port);
     void sendData(QByteArray data);
+    bool isConnected();
 
     //Simulation Data
     QImage _simulationViewImage;

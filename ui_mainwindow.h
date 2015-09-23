@@ -100,6 +100,7 @@ public:
     QPushButton *pushButtonSimulationConnection;
     QLineEdit *lineEditSimulationIP;
     QLineEdit *lineEditSimulationPort;
+    QLabel *labelConnectionStateSimu;
     QFrame *frame_2;
     QLabel *label_20;
     QLabel *label_21;
@@ -388,6 +389,9 @@ public:
         lineEditSimulationPort = new QLineEdit(frame);
         lineEditSimulationPort->setObjectName(QStringLiteral("lineEditSimulationPort"));
         lineEditSimulationPort->setGeometry(QRect(70, 55, 113, 20));
+        labelConnectionStateSimu = new QLabel(frame);
+        labelConnectionStateSimu->setObjectName(QStringLiteral("labelConnectionStateSimu"));
+        labelConnectionStateSimu->setGeometry(QRect(10, 80, 81, 16));
         frame_2 = new QFrame(scrollAreaWidgetContents);
         frame_2->setObjectName(QStringLiteral("frame_2"));
         frame_2->setGeometry(QRect(240, 0, 211, 111));
@@ -401,7 +405,7 @@ public:
         label_21->setGeometry(QRect(10, 30, 47, 13));
         label_22 = new QLabel(frame_2);
         label_22->setObjectName(QStringLiteral("label_22"));
-        label_22->setGeometry(QRect(10, 10, 47, 13));
+        label_22->setGeometry(QRect(10, 10, 61, 16));
         pushButtonBrainBoardConnection = new QPushButton(frame_2);
         pushButtonBrainBoardConnection->setObjectName(QStringLiteral("pushButtonBrainBoardConnection"));
         pushButtonBrainBoardConnection->setGeometry(QRect(130, 80, 75, 23));
@@ -581,6 +585,7 @@ public:
         pushButtonSimulationConnection->setText(QApplication::translate("MainWindow", "undefined", 0));
         lineEditSimulationIP->setText(QApplication::translate("MainWindow", "127.0.0.1", 0));
         lineEditSimulationPort->setText(QApplication::translate("MainWindow", "4545", 0));
+        labelConnectionStateSimu->setText(QApplication::translate("MainWindow", "state", 0));
         label_20->setText(QApplication::translate("MainWindow", "Port:", 0));
         label_21->setText(QApplication::translate("MainWindow", "IP:", 0));
         label_22->setText(QApplication::translate("MainWindow", "BrainBoard", 0));
