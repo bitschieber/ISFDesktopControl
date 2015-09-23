@@ -29,8 +29,8 @@ void ISFCarUc::start(void){
 
             if(this->_isfCarHAL->isPWMInValid()==true)
             {
-                newMotorPWM = 0;
-                newSteeringPWM = 0;
+                newMotorPWM = 1500;
+                newSteeringPWM = 1500;
             }
             else
             {
